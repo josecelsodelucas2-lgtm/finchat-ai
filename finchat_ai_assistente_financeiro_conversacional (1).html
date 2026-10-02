@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinChat AI - Assistente Financeiro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+    
+    @keyframes pulseSoft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .typing-dot {
+      animation: pulseSoft 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    /* Smartphone frame sheen */
+    .mockup-frame {
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 10px #0f172a, 0 0 0 12px #334155;
+    }
+    @media (max-width: 640px) {
+      .mockup-frame {
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-0 sm:p-4 font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <div class="mockup-frame w-full max-w-[430px] h-[100dvh] sm:h-[880px] bg-slate-950 sm:rounded-[44px] flex flex-col overflow-hidden relative border-0 sm:border border-slate-800">
+    
+    <!-- Phone Top Status Bar -->
+    <header class="pt-3 px-6 pb-2 flex items-center justify-between text-xs text-slate-400 bg-slate-950/80 backdrop-blur z-30 select-none">
+      <span id="current-clock" class="font-bold text-slate-200">14:28</span>
+      <!-- Dynamic Island / Speaker notch -->
+      <div class="w-24 h-4 bg-slate-900 rounded-full flex items-center justify-center space-x-1.5 border border-slate-800">
+        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+        <span class="text-[9px] text-slate-400 uppercase tracking-widest font-semibold">FinAI</span>
+      </div>
+      <div class="flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+        <span class="text-[10px] font-bold">5G</span>
+        <div class="w-5 h-2.5 border border-slate-400 rounded-sm p-[1px] flex">
+          <div class="w-3 h-full bg-emerald-400 rounded-[1px]"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top App Header -->
+    <div class="px-5 py-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/60 z-20">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-400 p-[2px] shadow-lg shadow-emerald-950/40">
+          <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-lg font-bold">
+            🌱
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="font-bold text-sm text-slate-100">FinChat AI</h1>
+            <span class="text-[10px] bg-brand-500/20 text-brand-400 font-semibold px-1.5 py-0.5 rounded-full border border-brand-500/30">Assistente</span>
+          </div>
+          <p class="text-[11px] text-slate-400 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block"></span>
+            Pronto para economizar
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Reset & Notification Info -->
+      <button onclick="resetData()" title="Restaurar dados padrão" class="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 rounded-xl transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+    </div>
+
+    <main class="flex-1 overflow-hidden relative">
+
+      <!-- ================= TELA 1: CHAT ================= -->
+      <section id="tab-chat" class="h-full flex flex-col justify-between">
+        <!-- Messages Flow Container -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+          <!-- Initial Welcome Messages will be dynamically rendered or static -->
+        </div>
+
+        <!-- Suggestions Chips -->
+        <div class="px-4 py-2 border-t border-slate-800/50 bg-slate-950/40">
+          <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">Exemplos rápidos</p>
+          <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+            <button onclick="quickSend('Gastei 35 reais no almoço')" class="whitespace-nowrap px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-brand-500/50 rounded-xl text-slate-300 hover:text-brand-400 transition-all text-left">
+              🍔 Almoço R$ 35
+            </button>
+            <button onclick="quickSend('Uber pro trabalho 22 reais')" class="whitespace-nowrap px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-brand-500/50 rounded-xl text-slate-300 hover:text-brand-400 transition-all text-left">
+              🚗 Uber R$ 22
+            </button>
+            <button onclick="quickSend('Recebi freelance 850')" class="whitespace-nowrap px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-brand-500/50 rounded-xl text-slate-300 hover:text-brand-400 transition-all text-left">
+              💰 Freelance R$ 850
+            </button>
+            <button onclick="quickSend('Quanto gastei hoje?')" class="whitespace-nowrap px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-brand-500/50 rounded-xl text-slate-300 hover:text-brand-400 transition-all text-left">
+              📊 Quanto gastei hoje?
+            </button>
+            <button onclick="quickSend('Dicas para economizar no mercado')" class="whitespace-nowrap px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-brand-500/50 rounded-xl text-slate-300 hover:text-brand-400 transition-all text-left">
+              💡 Dicas de economia
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <div class="p-3 border-t border-slate-800 bg-slate-950">
+          <form id="chat-form" onsubmit="handleChatSubmit(event)" class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <input 
+                id="chat-input" 
+                type="text" 
+                placeholder="Ex: 'gastei 45 na farmácia' ou 'recebi 3000'..." 
+                autocomplete="off"
+                class="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-4 pr-10 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
+              />
+              <button 
+                type="button" 
+                onclick="simulateVoiceInput()" 
+                title="Comando por voz simulado" 
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-400"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+              </button>
+            </div>
+            <button 
+              type="submit" 
+              class="bg-brand-600 hover:bg-brand-500 text-white p-3 rounded-2xl flex items-center justify-center transition-transform active:scale-95 shadow-md shadow-brand-600/30"
+            >
+              <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================= TELA 2: DASHBOARD ================= -->
+      <section id="tab-dashboard" class="h-full overflow-y-auto p-4 space-y-4 hidden">
+        <!-- Balance Cards -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-850 p-4 rounded-3xl border border-slate-800 shadow-sm relative overflow-hidden">
+          <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-brand-500/10 rounded-full blur-xl pointer-events-none"></div>
+          <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Saldo Líquido</span>
+          <div class="flex items-baseline justify-between mt-1">
+            <h2 id="dash-balance" class="text-2xl font-extrabold text-white">R$ 0,00</h2>
+            <span id="dash-health-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Saudável</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-800">
+            <div class="flex items-center space-x-2">
+              <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">↓</div>
+              <div>
+                <p class="text-[10px] text-slate-400">Entradas</p>
+                <p id="dash-income" class="text-xs font-bold text-emerald-400">R$ 0,00</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-7 h-7 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xs">↑</div>
+              <div>
+                <p class="text-[10px] text-slate-400">Despesas</p>
+                <p id="dash-expense" class="text-xs font-bold text-rose-400">R$ 0,00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Doughnut Chart -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold text-slate-200">Distribuição de Gastos</h3>
+            <span class="text-[10px] text-slate-400">Este Mês</span>
+          </div>
+          <div class="relative h-44 flex items-center justify-center">
+            <canvas id="categoryChart"></canvas>
+            <div id="chart-empty-msg" class="absolute inset-0 flex items-center justify-center text-xs text-slate-500 hidden">
+              Nenhuma despesa ainda
+            </div>
+          </div>
+          <div id="category-legend" class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-800 text-[11px]">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Financial Goals Section -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-slate-200">Metas & Economia</h3>
+            <button onclick="quickSend('Adicionar meta')" class="text-[10px] text-brand-400 hover:underline">+ Nova Meta</button>
+          </div>
+
+          <!-- Goal 1 -->
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300 font-medium">🛡️ Reserva de Emergência</span>
+              <span class="text-slate-400 font-bold" id="goal-1-text">R$ 1.850 / R$ 3.000</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div id="goal-1-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: 61%;"></div>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">61% concluído • Faltam R$ 1.150</p>
+          </div>
+
+          <!-- Goal 2 -->
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300 font-medium">✈️ Viagem de Férias</span>
+              <span class="text-slate-400 font-bold">R$ 720 / R$ 2.000</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-sky-500 to-blue-400 h-full rounded-full" style="width: 36%;"></div>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">36% concluído • Meta até Dezembro</p>
+          </div>
+        </div>
+
+        <!-- AI Coach Insight Card -->
+        <div class="bg-emerald-950/30 border border-brand-500/30 rounded-3xl p-4 flex gap-3 items-start">
+          <span class="text-2xl">💡</span>
+          <div>
+            <h4 class="text-xs font-bold text-brand-400">Dica da IA para você</h4>
+            <p id="dash-insight" class="text-[11px] text-slate-300 mt-1 leading-relaxed">
+              Você gastou 35% do total em delivery/refeições fora de casa. Cozinhar 2 vezes a mais por semana pouparia cerca de R$ 140/mês.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TELA 3: EXTRATO / HISTÓRICO ================= -->
+      <section id="tab-history" class="h-full overflow-y-auto p-4 space-y-3 hidden">
+        <div class="flex items-center justify-between pb-1">
+          <div>
+            <h2 class="text-sm font-bold text-slate-100">Lançamentos</h2>
+            <p class="text-[11px] text-slate-400" id="transactions-count">0 registros</p>
+          </div>
+          <!-- Category Filter -->
+          <select id="filter-category" onchange="renderTransactions()" class="bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-brand-500">
+            <option value="all">Todas categorias</option>
+            <option value="Alimentação">Alimentação</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Saúde">Saúde</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Moradia">Moradia</option>
+            <option value="Renda">Renda / Salário</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+
+        <!-- Transactions List -->
+        <div id="transactions-list" class="space-y-2">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+    </main>
+
+    <nav class="h-16 bg-slate-950 border-t border-slate-800 flex items-center justify-around px-4 z-20">
+      <button onclick="switchTab('chat')" id="nav-btn-chat" class="flex flex-col items-center gap-1 text-brand-400 font-semibold transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        <span class="text-[10px]">Chat</span>
+      </button>
+
+      <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+        <span class="text-[10px]">Painel</span>
+      </button>
+
+      <button onclick="switchTab('history')" id="nav-btn-history" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        <span class="text-[10px]">Extrato</span>
+      </button>
+    </nav>
+  </div>
+
+  <script>
+    // State Store
+    const STORAGE_KEY = 'FINCHAT_APP_DATA_V1';
+
+    const defaultState = {
+      transactions: [
+        { id: 1, type: 'income', title: 'Salário Mensal', amount: 3500.00, category: 'Renda', date: 'Hoje', time: '09:00' },
+        { id: 2, type: 'expense', title: 'Supermercado Mensal', amount: 480.50, category: 'Alimentação', date: 'Hoje', time: '11:15' },
+        { id: 3, type: 'expense', title: 'Farmácia & Vitaminas', amount: 65.00, category: 'Saúde', date: 'Hoje', time: '13:40' },
+        { id: 4, type: 'expense', title: 'Combustível Posto Ipiranga', amount: 120.00, category: 'Transporte', date: 'Ontem', time: '18:20' }
+      ],
+      chatHistory: [
+        {
+          sender: 'bot',
+          text: 'Olá! Sou o seu **Assistente Financeiro**. Diga o que você gastou ou recebeu em linguagem livre (ex.: *"almoço 32"*, *"comprei tênis 180"* ou *"recebi pix 200"*).',
+          time: '14:00'
+        }
+      ]
+    };
+
+    let appState = loadState();
+    let chartInstance = null;
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultState));
+      } catch (e) {
+        return JSON.parse(JSON.stringify(defaultState));
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.error('Erro ao salvar localmente', e);
+      }
+    }
+
+    function resetData() {
+      appState = JSON.parse(JSON.stringify(defaultState));
+      saveState();
+      renderChat();
+      renderDashboard();
+      renderTransactions();
+    }
+
+    /**
+     * Engine heurística em Javascript que simula o Function Calling / NLP da LLM
+     */
+    function parseNaturalLanguageExpense(text) {
+      const lower = text.toLowerCase().trim();
+
+      // Detection of intent: Summary query
+      if (lower.includes('quanto gastei') || lower.includes('resumo') || lower.includes('saldo') || lower.includes('extrato')) {
+        return { intent: 'QUERY_SUMMARY' };
+      }
+
+      // Detection of intent: Advice / Tip
+      if (lower.includes('dica') || lower.includes('economizar') || lower.includes('poupar') || lower.includes('ajuda')) {
+        return { intent: 'QUERY_ADVICE' };
+      }
+
+      // Detection of intent: Goal management
+      if (lower.includes('meta') || lower.includes('objetivo')) {
+        return { intent: 'QUERY_GOAL' };
+      }
+
+      // Number extraction (handles "35,50", "35.50", "35 reais", "R$ 35", etc.)
+      const numberRegex = /(?:r\$\s*)?(\d+(?:[.,]\d{1,2})?)/i;
+      const matchNumber = lower.match(numberRegex);
+
+      if (!matchNumber) {
+        return { intent: 'UNKNOWN' };
+      }
+
+      let rawNum = matchNumber[1].replace(',', '.');
+      const amount = parseFloat(rawNum);
+
+      if (isNaN(amount) || amount <= 0) {
+        return { intent: 'UNKNOWN' };
+      }
+
+      // Determine Type (Expense vs Income)
+      let type = 'expense';
+      const incomeKeywords = ['recebi', 'ganhei', 'salário', 'salario', 'freela', 'freelance', 'renda', 'pix recebido', 'depósito'];
+      if (incomeKeywords.some(kw => lower.includes(kw))) {
+        type = 'income';
+      }
+
+      // Determine Category
+      let category = 'Outros';
+      let title = text;
+
+      if (type === 'income') {
+        category = 'Renda';
+        title = 'Receita / Ganho';
+      } else {
+        const catMap = {
+          'Alimentação': ['almoço', 'almoco', 'jantar', 'lanche', 'pizza', 'comida', 'ifood', 'hambúrguer', 'restaurante', 'mercado', 'supermercado', 'padaria', 'café', 'cafe', 'açaí'],
+          'Transporte': ['uber', '99', 'táxi', 'gasolina', 'combustível', 'combustivel', 'posto', 'ônibus', 'onibus', 'metrô', 'metro', 'estacionamento', 'pedágio'],
+          'Saúde': ['farmácia', 'farmacia', 'remédio', 'remedio', 'médico', 'medico', 'consulta', 'exame', 'dentista', 'psicólogo', 'hospital'],
+          'Lazer': ['cinema', 'show', 'cerveja', 'bar', 'festa', 'viagem', 'passeio', 'netflix', 'spotify', 'jogo', 'games'],
+          'Moradia': ['aluguel', 'condomínio', 'condominio', 'luz', 'água', 'agua', 'energia', 'internet', 'gás', 'gas', 'casa']
+        };
+
+        for (const [catName, keywords] of Object.entries(catMap)) {
+          if (keywords.some(kw => lower.includes(kw))) {
+            category = catName;
+            break;
+          }
+        }
+      }
+
+      // Clean Title
+      let cleanTitle = text
+        .replace(/gastei|comprei|paguei|recebi|ganhei|com|no|na|de|em|reais|r\$/gi, '')
+        .replace(matchNumber[0], '')
+        .trim();
+
+      if (!cleanTitle || cleanTitle.length < 2) {
+        cleanTitle = category !== 'Outros' ? category : (type === 'income' ? 'Entrada' : 'Despesa');
+      } else {
+        // Capitalize first letter
+        cleanTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
+      }
+
+      return {
+        intent: 'TRANSACTION',
+        type,
+        amount,
+        category,
+        title: cleanTitle
+      };
+    }
+
+    function handleChatSubmit(e) {
+      if (e) e.preventDefault();
+      const inputEl = document.getElementById('chat-input');
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      inputEl.value = '';
+      addUserMessage(text);
+      processBotResponse(text);
+    }
+
+    function quickSend(message) {
+      addUserMessage(message);
+      processBotResponse(message);
+    }
+
+    function simulateVoiceInput() {
+      const examples = [
+        "Gastei 18 reais no café e pão de queijo",
+        "Paguei 45 no táxi pra voltar da praia",
+        "Recebi 450 do freela de design",
+        "Quanto gastei hoje?"
+      ];
+      const randomText = examples[Math.floor(Math.random() * examples.length)];
+      addUserMessage(`🎙️ "${randomText}"`);
+      processBotResponse(randomText);
+    }
+
+    function addUserMessage(text) {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      appState.chatHistory.push({
+        sender: 'user',
+        text: text,
+        time: timeStr
+      });
+      renderChat();
+    }
+
+    function addBotMessage(text, card = null) {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      appState.chatHistory.push({
+        sender: 'bot',
+        text: text,
+        card: card,
+        time: timeStr
+      });
+      renderChat();
+      saveState();
+    }
+
+    function processBotResponse(userInput) {
+      // Show simulated typing dots
+      const chatContainer = document.getElementById('chat-messages');
+      const typingIndicator = document.createElement('div');
+      typingIndicator.id = 'typing-bubble';
+      typingIndicator.className = 'flex items-center space-x-1.5 bg-slate-800 text-slate-400 px-4 py-2.5 rounded-2xl w-fit text-xs';
+      typingIndicator.innerHTML = `
+        <span class="w-1.5 h-1.5 bg-brand-400 rounded-full typing-dot"></span>
+        <span class="w-1.5 h-1.5 bg-brand-400 rounded-full typing-dot"></span>
+        <span class="w-1.5 h-1.5 bg-brand-400 rounded-full typing-dot"></span>
+      `;
+      chatContainer.appendChild(typingIndicator);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      setTimeout(() => {
+        // Remove typing
+        const el = document.getElementById('typing-bubble');
+        if (el) el.remove();
+
+        const parsed = parseNaturalLanguageExpense(userInput);
+
+        if (parsed.intent === 'TRANSACTION') {
+          const newTx = {
+            id: Date.now(),
+            type: parsed.type,
+            title: parsed.title,
+            amount: parsed.amount,
+            category: parsed.category,
+            date: 'Hoje',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+
+          appState.transactions.unshift(newTx);
+          saveState();
+
+          const formattedValue = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parsed.amount);
+          const icon = parsed.type === 'income' ? '🟢' : '🔴';
+
+          const responseMsg = parsed.type === 'income'
+            ? `Entrada anotada! Adicionei **${formattedValue}** na sua categoria de **${parsed.category}**.`
+            : `Anotado com sucesso! Registrei **${formattedValue}** em **${parsed.category}**.`;
+
+          addBotMessage(responseMsg, {
+            title: newTx.title,
+            amount: formattedValue,
+            category: newTx.category,
+            type: newTx.type
+          });
+
+          renderDashboard();
+          renderTransactions();
+        } else if (parsed.intent === 'QUERY_SUMMARY') {
+          const totals = calculateTotals();
+          const fmtExpense = formatBRL(totals.expenses);
+          const fmtBalance = formatBRL(totals.balance);
+
+          addBotMessage(`Você gastou um total de **${fmtExpense}** até agora. Seu saldo atual consolidado é de **${fmtBalance}**. Você pode ver o detalhamento completo na aba **Painel**.`);
+        } else if (parsed.intent === 'QUERY_ADVICE') {
+          const tips = [
+            "Regra dos 50-30-20: Tente direcionar 50% da sua renda para necessidades básicas, 30% para estilo de vida e 20% para a sua reserva de emergência!",
+            "Evite compras por impulso: Deixe itens no carrinho de compras online por 24 horas antes de pagar. Quase 40% das pessoas desistem da compra.",
+            "Pequenos vazamentos: Assinaturas de streaming e apps pouco usados podem somar mais de R$ 90/mês sem você perceber."
+          ];
+          const chosen = tips[Math.floor(Math.random() * tips.length)];
+          addBotMessage(`💡 **Dica do Especialista:** ${chosen}`);
+        } else if (parsed.intent === 'QUERY_GOAL') {
+          addBotMessage(`Sua meta atual **"Reserva de Emergência"** está em **61%**. Faltam apenas R$ 1.150 para garantir sua segurança financeira dos próximos meses!`);
+        } else {
+          addBotMessage(`Não consegui identificar o valor com clareza. Tente escrever algo como: *"Gastei 25 na padaria"* ou *"Recebi 1500"* que eu categorizo para você!`);
+        }
+      }, 600);
+    }
+
+    function renderChat() {
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = '';
+
+      appState.chatHistory.forEach(msg => {
+        const isUser = msg.sender === 'user';
+        const wrapper = document.createElement('div');
+        wrapper.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1`;
+
+        // Parse markdown-like bold (**text**)
+        let formattedText = msg.text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+
+        let cardHtml = '';
+        if (msg.card) {
+          const isInc = msg.card.type === 'income';
+          cardHtml = `
+            <div class="mt-2 p-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl flex items-center justify-between text-xs w-full shadow-inner">
+              <div class="flex items-center space-x-2">
+                <span class="w-6 h-6 rounded-lg ${isInc ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} flex items-center justify-center font-bold text-[10px]">
+                  ${isInc ? '+' : '-'}
+                </span>
+                <div>
+                  <p class="font-bold text-slate-200">${msg.card.title}</p>
+                  <p class="text-[10px] text-slate-400">${msg.card.category}</p>
+                </div>
+              </div>
+              <span class="font-bold ${isInc ? 'text-emerald-400' : 'text-slate-100'}">${msg.card.amount}</span>
+            </div>
+          `;
+        }
+
+        wrapper.innerHTML = `
+          <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-[13px] leading-relaxed shadow-sm ${
+            isUser 
+              ? 'bg-brand-600 text-white rounded-br-sm' 
+              : 'bg-slate-800/90 text-slate-200 border border-slate-700/50 rounded-bl-sm'
+          }">
+            <p>${formattedText}</p>
+            ${cardHtml}
+          </div>
+          <span class="text-[9px] text-slate-500 px-1">${msg.time}</span>
+        `;
+        container.appendChild(wrapper);
+      });
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function calculateTotals() {
+      let income = 0;
+      let expenses = 0;
+      const categoriesMap = {};
+
+      appState.transactions.forEach(t => {
+        if (t.type === 'income') {
+          income += t.amount;
+        } else {
+          expenses += t.amount;
+          categoriesMap[t.category] = (categoriesMap[t.category] || 0) + t.amount;
+        }
+      });
+
+      return {
+        income,
+        expenses,
+        balance: income - expenses,
+        categories: categoriesMap
+      };
+    }
+
+    function formatBRL(value) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    }
+
+    function renderDashboard() {
+      const totals = calculateTotals();
+
+      document.getElementById('dash-balance').innerText = formatBRL(totals.balance);
+      document.getElementById('dash-income').innerText = formatBRL(totals.income);
+      document.getElementById('dash-expense').innerText = formatBRL(totals.expenses);
+
+      // Badge status
+      const badge = document.getElementById('dash-health-badge');
+      if (totals.balance >= 0) {
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        badge.innerText = 'Positivo';
+      } else {
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        badge.innerText = 'Atenção';
+      }
+
+      // Chart Render
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      const catKeys = Object.keys(totals.categories);
+      const catValues = Object.values(totals.categories);
+      const emptyMsg = document.getElementById('chart-empty-msg');
+      const legendContainer = document.getElementById('category-legend');
+
+      const palette = {
+        'Alimentação': '#f59e0b',
+        'Transporte': '#3b82f6',
+        'Saúde': '#ec4899',
+        'Lazer': '#8b5cf6',
+        'Moradia': '#10b981',
+        'Outros': '#64748b'
+      };
+
+      if (catKeys.length === 0) {
+        if (chartInstance) chartInstance.destroy();
+        emptyMsg.classList.remove('hidden');
+        legendContainer.innerHTML = '';
+        return;
+      } else {
+        emptyMsg.classList.add('hidden');
+      }
+
+      const bgColors = catKeys.map(k => palette[k] || '#94a3b8');
+
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: catKeys,
+          datasets: [{
+            data: catValues,
+            backgroundColor: bgColors,
+            borderColor: '#0f172a',
+            borderWidth: 3,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.label}: ${formatBRL(context.parsed)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Render custom legend
+      legendContainer.innerHTML = '';
+      catKeys.forEach((key, idx) => {
+        const val = catValues[idx];
+        const pct = ((val / (totals.expenses || 1)) * 100).toFixed(0);
+        const col = bgColors[idx];
+
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between text-slate-300';
+        item.innerHTML = `
+          <div class="flex items-center space-x-1.5 truncate">
+            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${col}"></span>
+            <span class="truncate">${key}</span>
+          </div>
+          <span class="font-bold text-slate-400 ml-1">${pct}%</span>
+        `;
+        legendContainer.appendChild(item);
+      });
+    }
+
+    function renderTransactions() {
+      const filter = document.getElementById('filter-category').value;
+      const listContainer = document.getElementById('transactions-list');
+      const countEl = document.getElementById('transactions-count');
+
+      const filtered = appState.transactions.filter(t => {
+        if (filter === 'all') return true;
+        return t.category === filter;
+      });
+
+      countEl.innerText = `${filtered.length} transaç${filtered.length === 1 ? 'ão' : 'ões'}`;
+      listContainer.innerHTML = '';
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-8 text-slate-500 text-xs">
+            Nenhuma transação encontrada nessa categoria.
+          </div>
+        `;
+        return;
+      }
+
+      const catEmoji = {
+        'Alimentação': '🍔',
+        'Transporte': '🚗',
+        'Saúde': '💊',
+        'Lazer': '🎉',
+        'Moradia': '🏠',
+        'Renda': '💵',
+        'Outros': '📦'
+      };
+
+      filtered.forEach(tx => {
+        const isInc = tx.type === 'income';
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900 border border-slate-800 hover:border-slate-700/80 p-3 rounded-2xl flex items-center justify-between transition-all group';
+
+        card.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl ${isInc ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-300'} flex items-center justify-center text-base">
+              ${catEmoji[tx.category] || '💰'}
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-200 line-clamp-1">${tx.title}</p>
+              <div class="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
+                <span class="bg-slate-800 px-1.5 py-0.2 rounded font-medium">${tx.category}</span>
+                <span>• ${tx.date} ${tx.time ? tx.time : ''}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold ${isInc ? 'text-emerald-400' : 'text-slate-100'}">
+              ${isInc ? '+' : '-'}${formatBRL(tx.amount)}
+            </span>
+            <button onclick="deleteTransaction(${tx.id})" title="Remover" class="opacity-40 group-hover:opacity-100 text-slate-500 hover:text-rose-400 transition-opacity p-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        `;
+
+        listContainer.appendChild(card);
+      });
+    }
+
+    function deleteTransaction(id) {
+      appState.transactions = appState.transactions.filter(t => t.id !== id);
+      saveState();
+      renderDashboard();
+      renderTransactions();
+    }
+
+    function switchTab(tabId) {
+      const tabs = ['chat', 'dashboard', 'history'];
+      tabs.forEach(t => {
+        const sec = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`nav-btn-${t}`);
+        if (t === tabId) {
+          sec.classList.remove('hidden');
+          btn.className = 'flex flex-col items-center gap-1 text-brand-400 font-semibold transition-colors';
+        } else {
+          sec.classList.add('hidden');
+          btn.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 transition-colors';
+        }
+      });
+
+      if (tabId === 'dashboard') {
+        renderDashboard();
+      } else if (tabId === 'history') {
+        renderTransactions();
+      }
+    }
+
+    // Clock update
+    function updateClock() {
+      const now = new Date();
+      const str = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('current-clock').innerText = str;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderChat();
+      renderDashboard();
+      renderTransactions();
+      updateClock();
+      setInterval(updateClock, 30000);
+    });
+  </script>
+</body>
+</html>
